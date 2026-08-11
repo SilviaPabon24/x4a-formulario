@@ -216,13 +216,12 @@ function recalcIngresoEstimado() {
 }
 
 function populateSituacionSelect() {
-  const sel = $("situacion");
-  sel.innerHTML = '<option value="">Selecciona…</option>';
+  const list = $("situacionDatalist");
+  list.innerHTML = "";
   SITUACIONES.forEach((s) => {
     const opt = document.createElement("option");
     opt.value = s;
-    opt.textContent = s;
-    sel.appendChild(opt);
+    list.appendChild(opt);
   });
 }
 
@@ -259,40 +258,34 @@ async function guardarOportunidad() {
   btn.textContent = "Guardando…";
 
   const fechaCierre = $("fechaCierreIngram").value; // YYYY-MM-DD
-  const [y, m] = fechaCierre.split("-");
-  const quarter = Math.ceil(parseInt(m, 10) / 3);
 
   const payload = {
     action: "create",
     row: {
       "Government Number": $("gobierno").value,
       Owner: $("creadoPor").value,
-      "Est Close Date": fechaCierre,
+      "Est. Close Date": fechaCierre,
       "Expiry Date": $("fechaCierreFabricante").value || fechaCierre,
       Probability: $("probabilidad").value,
-      AccountID: $("bcn").value,
       "End User Name": $("clienteFinal").value,
       Subject: $("temaFinal").value,
       "Source Campaign": $("campana").value,
-      "Est Revenue": (
-        parseFloat($("valorCotizado").value) *
-        parseFloat($("trmDia").value) /
+      "Est. Revenue": (
+        (parseFloat($("valorCotizado").value) *
+          parseFloat($("trmDia").value)) /
         parseFloat($("trmBase").value)
       ).toFixed(2),
       "Budget Amount": $("compraEstimada").value,
-      Currency: "US Dollar",
       "Current Situation": $("situacion").value,
-      "IM Calendar Month": m,
-      "IM Calendar Quarter": "Q" + quarter,
-      "IM Calendar Year": y,
       "Created By": $("creadoPor").value,
-      "Primary Email (Created By)": $("creadoPorEmail").value,
-      Country: "Colombia",
-      "Source of originating lead": $("origen").value,
-      "Is Renewal Order": $("gobierno").value.toLowerCase().includes("renov") ||
+      "Primary Email (Created By) (User)": $("creadoPorEmail").value,
+      BCN: $("bcn").value,
+      "Source of originating lead?": $("origen").value,
+      "Is Renewal Order":
+        $("gobierno").value.toLowerCase().includes("renov") ||
         $("gobierno").value.toLowerCase().includes("renew")
-        ? "Yes"
-        : "No",
+          ? "Yes"
+          : "No",
     },
   };
 
@@ -365,6 +358,9 @@ function showToast(msg, isError = false) {
 }
 
 // ---------- Dashboard ----------
+let CRM_COLUMNS = [];
+let LAST_ROWS = [];
+
 async function loadDashboard() {
   const tbody = $("dashboardBody");
   tbody.innerHTML = `<tr><td colspan="8" class="muted">Cargando…</td></tr>`;
@@ -372,7 +368,9 @@ async function loadDashboard() {
     const url = `${APPS_SCRIPT_URL}?action=list`;
     const res = await fetch(url);
     const data = await res.json();
-    renderDashboard(data.rows || []);
+    CRM_COLUMNS = data.columns || [];
+    LAST_ROWS = data.rows || [];
+    renderDashboard(LAST_ROWS);
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="8" class="muted">No se pudo cargar el dashboard (configura el backend en js/config.js — ver README.md).</td></tr>`;
   }
@@ -392,13 +390,36 @@ function renderDashboard(rows) {
       <td>${r["End User Name"] || ""}</td>
       <td>${r["Subject"] || ""}</td>
       <td>${r["Government Number"] || ""}</td>
-      <td>${r["Est Revenue"] ? fmtMoney(parseFloat(r["Est Revenue"])) : ""}</td>
+      <td>${r["Est. Revenue"] ? fmtMoney(parseFloat(r["Est. Revenue"])) : ""}</td>
       <td>${r["Created By"] || ""}</td>
       <td>${r["Created On"] || ""}</td>
       <td>${r.Notificado === "Si" ? '<span class="badge badge-ok">Notificado</span>' : '<span class="badge">Pendiente</span>'}</td>
     `;
     tbody.appendChild(tr);
   });
+}
+
+// ---------- Exportar a Excel (formato listo para pegar en X4A) ----------
+function exportarExcel() {
+  if (!LAST_ROWS.length) {
+    showToast("No hay oportunidades cargadas para exportar.", true);
+    return;
+  }
+  const cols = CRM_COLUMNS.length
+    ? CRM_COLUMNS
+    : Object.keys(LAST_ROWS[0]).filter(
+        (k) => k !== "Notificado" && k !== "Fecha Notificación"
+      );
+
+  const data = LAST_ROWS.map((r) => cols.map((c) => r[c] ?? ""));
+  const worksheetData = [cols, ...data];
+
+  const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Oportunidades X4A");
+
+  const fecha = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `X4A_Oportunidades_${fecha}.xlsx`);
 }
 
 async function notificarSeleccionados() {
@@ -475,6 +496,7 @@ async function init() {
   $("btnGuardar").addEventListener("click", guardarOportunidad);
   $("btnNotificar").addEventListener("click", notificarSeleccionados);
   $("btnRefrescarDashboard").addEventListener("click", loadDashboard);
+  $("btnExportarExcel").addEventListener("click", exportarExcel);
 
   $("trmDia").value = "";
   $("trmBase").value = "3708";
