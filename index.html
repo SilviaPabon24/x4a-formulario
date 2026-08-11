@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>X4A — Formulario de Llaves</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <h1>Formulario de Creación / Actualización de Oportunidad — CRM X4A</h1>
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="panel-formulario">Formulario</button>
+      <button class="tab-btn" data-tab="panel-dashboard">Dashboard</button>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ===================== FORMULARIO ===================== -->
+  <section id="panel-formulario" class="tab-panel active">
+
+    <p class="hint">Celdas amarillas = campos a diligenciar. Campos grises = calculados automáticamente.</p>
+
+    <fieldset class="card">
+      <legend>1. Canal — Cliente</legend>
+
+      <div class="field">
+        <label for="nombreCanal">Nombre del canal</label>
+        <input list="canalDatalist" id="nombreCanal" placeholder="Escribe para buscar…" autocomplete="off" />
+        <datalist id="canalDatalist"></datalist>
+      </div>
+
+      <div class="field">
+        <label for="bcn">BCN (código SAP) — automático</label>
+        <input id="bcn" class="calc-field" readonly />
+        <small id="bcnWarning" class="warning-text"></small>
+      </div>
+
+      <div class="field">
+        <label for="clienteFinal">Cliente final</label>
+        <input id="clienteFinal" placeholder="Se autocompleta con el canal; edítalo si el cliente final es distinto" />
+      </div>
+    </fieldset>
+
+    <fieldset class="card">
+      <legend>2. Llave de creación (deben ser coherentes entre sí)</legend>
+
+      <div class="field">
+        <label for="origen">Fuente de Origen Potencial</label>
+        <select id="origen"></select>
+      </div>
+
+      <div class="field">
+        <label for="gobierno">Gobierno</label>
+        <select id="gobierno" disabled><option value="">Selecciona primero el Origen…</option></select>
+      </div>
+
+      <div class="field">
+        <label for="campana">Fuente de Campaña</label>
+        <select id="campana" disabled><option value="">Selecciona primero el Gobierno…</option></select>
+      </div>
+
+      <div class="field">
+        <label for="temaPrefix">TEMA — inicia por (automático)</label>
+        <input id="temaPrefix" class="calc-field" readonly />
+      </div>
+
+      <div class="field">
+        <label for="detalle">Detalle de la oportunidad</label>
+        <input id="detalle" placeholder="p. ej. FS5600 40 TB O-10012" />
+      </div>
+
+      <div class="field">
+        <label for="temaFinal">Campo TEMA final (copiar al CRM)</label>
+        <input id="temaFinal" class="calc-field" readonly />
+      </div>
+
+      <div id="validacionLlave" class="status-box"></div>
+      <div id="avisoAmbiguedad" class="status-box"></div>
+    </fieldset>
+
+    <fieldset class="card">
+      <legend>3. Datos comerciales</legend>
+
+      <div class="field-grid">
+        <div class="field">
+          <label for="fechaCierreIngram">Fecha Estimada de Cierre (Ingram)</label>
+          <input type="date" id="fechaCierreIngram" />
+        </div>
+        <div class="field">
+          <label for="fechaCierreFabricante">Fecha Cierre Fabricante (IBM o Red Hat)</label>
+          <input type="date" id="fechaCierreFabricante" />
+        </div>
+        <div class="field">
+          <label for="valorCotizado">Valor cotizado (USD)</label>
+          <input type="number" step="0.01" id="valorCotizado" />
+        </div>
+        <div class="field">
+          <label for="compraEstimada">Compra Estimada (Fabricante, USD)</label>
+          <input type="number" step="0.01" id="compraEstimada" />
+        </div>
+        <div class="field">
+          <label for="trmDia">TRM del día</label>
+          <input type="number" step="0.01" id="trmDia" />
+        </div>
+        <div class="field">
+          <label for="trmBase">TRM base 2026 (plan / indexación)</label>
+          <input type="number" step="0.01" id="trmBase" />
+        </div>
+        <div class="field">
+          <label for="ingresoEstimado">Ingreso Estimado a comprometer (USD indexado)</label>
+          <input id="ingresoEstimado" class="calc-field" readonly />
+        </div>
+        <div class="field">
+          <label for="probabilidad">Probabilidad (%)</label>
+          <input type="number" min="0" max="100" id="probabilidad" />
+        </div>
+        <div class="field">
+          <label for="situacion">Situación Actual</label>
+          <select id="situacion"></select>
+        </div>
+        <div class="field">
+          <label>Moneda</label>
+          <input value="US Dollar" class="calc-field" readonly />
+        </div>
+        <div class="field">
+          <label>País</label>
+          <input value="Colombia" class="calc-field" readonly />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="card">
+      <legend>4. Responsable (para notificaciones)</legend>
+      <div class="field-grid">
+        <div class="field">
+          <label for="creadoPor">Creado por</label>
+          <input id="creadoPor" placeholder="Nombre completo" />
+        </div>
+        <div class="field">
+          <label for="creadoPorEmail">Correo</label>
+          <input type="email" id="creadoPorEmail" placeholder="nombre@ingrammicro.com" />
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button id="btnGuardar" class="btn-primary" disabled>Guardar oportunidad en X4A</button>
+    </div>
+  </section>
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <section id="panel-dashboard" class="tab-panel">
+    <div class="dashboard-toolbar">
+      <button id="btnRefrescarDashboard" class="btn-secondary">Actualizar</button>
+      <button id="btnNotificar" class="btn-primary">Notificar seleccionados</button>
+    </div>
+    <table class="dashboard-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Cliente final</th>
+          <th>TEMA</th>
+          <th>Gobierno</th>
+          <th>Ingreso estimado</th>
+          <th>Creado por</th>
+          <th>Creado el</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="dashboardBody">
+        <tr><td colspan="8" class="muted">Cargando…</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
