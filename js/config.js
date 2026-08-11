@@ -6,4 +6,4 @@
 // 2. Pega aquí la URL que te entrega Apps Script al publicar
 //    el Web App (termina en /exec).
 // ============================================================
-const APPS_SCRIPT_URL = "PEGA_AQUI_TU_URL_DE_APPS_SCRIPT";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_NCQq4B4HkTjlNAYbwrsMSXtChnC6S09ECmw6p9KEBCiSYjcNNCBpQrxONF_YAxDm-g/exec";
