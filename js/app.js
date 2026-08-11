@@ -261,9 +261,7 @@ async function guardarOportunidad() {
     action: "create",
     row: {
       "Government Number": $("gobierno").value,
-      Owner: $("creadoPor").value,
       "Est. Close Date": fechaCierre,
-      "Expiry Date": $("fechaCierreFabricante").value || fechaCierre,
       Probability: $("probabilidad").value,
       "End User Name": $("clienteFinal").value,
       Subject: $("temaFinal").value,
@@ -275,15 +273,14 @@ async function guardarOportunidad() {
       ).toFixed(2),
       "Budget Amount": $("compraEstimada").value,
       "Current Situation": $("situacion").value,
-      "Created By": $("creadoPor").value,
-      "Primary Email (Created By) (User)": $("creadoPorEmail").value,
-      BCN: $("bcn").value,
       "Source of originating lead?": $("origen").value,
       "Is Renewal Order":
         $("gobierno").value.toLowerCase().includes("renov") ||
         $("gobierno").value.toLowerCase().includes("renew")
           ? "Yes"
           : "No",
+      Solicitante: $("creadoPor").value,
+      "Correo Solicitante": $("creadoPorEmail").value,
     },
   };
 
@@ -383,13 +380,13 @@ function renderDashboard(rows) {
   rows.forEach((r) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><input type="checkbox" class="rowCheck" data-id="${r.ID}" ${r.Notificado === "Si" ? "disabled" : ""}></td>
+      <td><input type="checkbox" class="rowCheck" data-id="${r["ID Interno"]}" ${r.Notificado === "Si" ? "disabled" : ""}></td>
       <td>${r["End User Name"] || ""}</td>
       <td>${r["Subject"] || ""}</td>
       <td>${r["Government Number"] || ""}</td>
       <td>${r["Est. Revenue"] ? fmtMoney(parseFloat(r["Est. Revenue"])) : ""}</td>
-      <td>${r["Created By"] || ""}</td>
-      <td>${r["Created On"] || ""}</td>
+      <td>${r["Solicitante"] || ""}</td>
+      <td>${r["Notificado"] === "Si" ? (r["Fecha Notificación"] || "") : ""}</td>
       <td>${r.Notificado === "Si" ? '<span class="badge badge-ok">Notificado</span>' : '<span class="badge">Pendiente</span>'}</td>
     `;
     tbody.appendChild(tr);
