@@ -62,9 +62,6 @@ function setupCanalAutocomplete() {
 
   input.addEventListener("input", () => {
     recalcBCN();
-    if (!$("clienteFinal").dataset.userEdited) {
-      $("clienteFinal").value = input.value;
-    }
     validateAll();
   });
 }
@@ -239,6 +236,7 @@ function validateAll() {
     llaveOk &&
     temaOk &&
     bcnOk &&
+    norm($("clienteFinal").value) &&
     norm($("fechaCierreIngram").value) &&
     norm($("valorCotizado").value) &&
     norm($("situacion").value) &&
@@ -335,7 +333,6 @@ function resetForm() {
     "probabilidad",
   ].forEach((id) => ($(id).value = ""));
   $("clienteFinal").value = "";
-  delete $("clienteFinal").dataset.userEdited;
   $("bcn").value = "";
   $("origen").value = "";
   populateGobiernoSelect();
@@ -486,10 +483,7 @@ async function init() {
   });
   $("campana").addEventListener("change", validateAll);
   $("detalle").addEventListener("input", validateAll);
-  $("clienteFinal").addEventListener("input", (e) => {
-    e.target.dataset.userEdited = "1";
-  });
-  ["valorCotizado", "trmDia", "trmBase", "fechaCierreIngram", "fechaCierreFabricante", "compraEstimada", "probabilidad", "situacion", "creadoPor", "creadoPorEmail"].forEach(
+  ["valorCotizado", "trmDia", "trmBase", "fechaCierreIngram", "fechaCierreFabricante", "compraEstimada", "probabilidad", "situacion", "creadoPor", "creadoPorEmail", "clienteFinal"].forEach(
     (id) => $(id).addEventListener("input", validateAll)
   );
 
