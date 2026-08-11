@@ -1,0 +1,142 @@
+[
+ {
+  "origen": "IBM",
+  "gobierno": "IBM - Infraestructura",
+  "tema": "Proyecto_HW_Calzado",
+  "campanas": [
+   "Power",
+   "HW Storage",
+   "SW Storage"
+  ]
+ },
+ {
+  "origen": "IBM",
+  "gobierno": "IBM - Software",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "IBM Data",
+   "IBM Automation"
+  ]
+ },
+ {
+  "origen": "IBM",
+  "gobierno": "IBM - Renovación SW",
+  "tema": "Proyecto_RNW_Calzado",
+  "campanas": [
+   "S&S"
+  ]
+ },
+ {
+  "origen": "IBM",
+  "gobierno": "IBM - Renovación HW",
+  "tema": "Proyecto_RNW_Calzado",
+  "campanas": [
+   "TSS"
+  ]
+ },
+ {
+  "origen": "RED HAT",
+  "gobierno": "RED HAT - CCSP",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "Red Hat"
+  ]
+ },
+ {
+  "origen": "RED HAT",
+  "gobierno": "RED HAT - EXAM",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "Red Hat"
+  ]
+ },
+ {
+  "origen": "RED HAT",
+  "gobierno": "RED HAT - SERVICIOS",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "Red Hat"
+  ]
+ },
+ {
+  "origen": "RED HAT",
+  "gobierno": "RED HAT - NEW ANSIBLE",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "Red Hat"
+  ]
+ },
+ {
+  "origen": "RED HAT",
+  "gobierno": "RED HAT - NEW OPENSHIFT",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "Red Hat"
+  ]
+ },
+ {
+  "origen": "RED HAT",
+  "gobierno": "RED HAT - NEW RHEL",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "Red Hat"
+  ]
+ },
+ {
+  "origen": "RED HAT",
+  "gobierno": "RED HAT - RENEW ANSIBLE",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "Red Hat"
+  ]
+ },
+ {
+  "origen": "RED HAT",
+  "gobierno": "RED HAT - RENEW RHEL",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "Red Hat"
+  ]
+ },
+ {
+  "origen": "RED HAT",
+  "gobierno": "RED HAT - RW OPENSHIFT",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "Red Hat"
+  ]
+ },
+ {
+  "origen": "RED HAT",
+  "gobierno": "RED HAT - TRAINING",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "Red Hat"
+  ]
+ },
+ {
+  "origen": "Traditional",
+  "gobierno": "Traditional IBM - Software",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "IBM Data",
+   "IBM Automation"
+  ]
+ },
+ {
+  "origen": "Traditional",
+  "gobierno": "Traditional IBM - Hardware",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "HW Storage"
+  ]
+ },
+ {
+  "origen": "Traditional",
+  "gobierno": "Traditional IBM - Cloud",
+  "tema": "Proyecto_SW_Calzado",
+  "campanas": [
+   "IBM Cloud"
+  ]
+ }
+]
