@@ -239,9 +239,7 @@ function validateAll() {
     norm($("clienteFinal").value) &&
     norm($("fechaCierreIngram").value) &&
     norm($("valorCotizado").value) &&
-    norm($("situacion").value) &&
-    norm($("creadoPor").value) &&
-    norm($("creadoPorEmail").value);
+    norm($("situacion").value);
 
   $("btnGuardar").disabled = !allOk;
   return allOk;
@@ -279,8 +277,6 @@ async function guardarOportunidad() {
         $("gobierno").value.toLowerCase().includes("renew")
           ? "Yes"
           : "No",
-      Solicitante: $("creadoPor").value,
-      "Correo Solicitante": $("creadoPorEmail").value,
     },
   };
 
@@ -357,7 +353,7 @@ let LAST_ROWS = [];
 
 async function loadDashboard() {
   const tbody = $("dashboardBody");
-  tbody.innerHTML = `<tr><td colspan="8" class="muted">Cargando…</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="4" class="muted">Cargando…</td></tr>`;
   try {
     const url = `${APPS_SCRIPT_URL}?action=list`;
     const res = await fetch(url);
@@ -366,28 +362,24 @@ async function loadDashboard() {
     LAST_ROWS = data.rows || [];
     renderDashboard(LAST_ROWS);
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="8" class="muted">No se pudo cargar el dashboard (configura el backend en js/config.js — ver README.md).</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" class="muted">No se pudo cargar el dashboard (configura el backend en js/config.js — ver README.md).</td></tr>`;
   }
 }
 
 function renderDashboard(rows) {
   const tbody = $("dashboardBody");
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="muted">Aún no hay oportunidades cargadas.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" class="muted">Aún no hay oportunidades cargadas.</td></tr>`;
     return;
   }
   tbody.innerHTML = "";
   rows.forEach((r) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><input type="checkbox" class="rowCheck" data-id="${r["ID Interno"]}" ${r.Notificado === "Si" ? "disabled" : ""}></td>
       <td>${r["End User Name"] || ""}</td>
       <td>${r["Subject"] || ""}</td>
       <td>${r["Government Number"] || ""}</td>
       <td>${r["Est. Revenue"] ? fmtMoney(parseFloat(r["Est. Revenue"])) : ""}</td>
-      <td>${r["Solicitante"] || ""}</td>
-      <td>${r["Notificado"] === "Si" ? (r["Fecha Notificación"] || "") : ""}</td>
-      <td>${r.Notificado === "Si" ? '<span class="badge badge-ok">Notificado</span>' : '<span class="badge">Pendiente</span>'}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -452,32 +444,6 @@ async function copiarTablaAlPortapapeles() {
   }
 }
 
-async function notificarSeleccionados() {
-  const checks = Array.from(document.querySelectorAll(".rowCheck:checked"));
-  if (!checks.length) {
-    showToast("Selecciona al menos una oportunidad para notificar.", true);
-    return;
-  }
-  const ids = checks.map((c) => c.dataset.id);
-  const btn = $("btnNotificar");
-  btn.disabled = true;
-  btn.textContent = "Enviando…";
-  try {
-    const res = await postToBackend({ action: "notify", ids });
-    if (res && res.ok) {
-      showToast(`Correo enviado a ${res.sent} persona(s).`);
-      loadDashboard();
-    } else {
-      showToast("No se pudo enviar: " + (res.error || "error"), true);
-    }
-  } catch (err) {
-    showToast("Falló el envío de correos.", true);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Notificar seleccionados";
-  }
-}
-
 // ---------- Navegación por pestañas ----------
 function setupTabs() {
   document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -516,12 +482,11 @@ async function init() {
   });
   $("campana").addEventListener("change", validateAll);
   $("detalle").addEventListener("input", validateAll);
-  ["valorCotizado", "trmDia", "trmBase", "fechaCierreIngram", "fechaCierreFabricante", "compraEstimada", "probabilidad", "situacion", "creadoPor", "creadoPorEmail", "clienteFinal"].forEach(
+  ["valorCotizado", "trmDia", "trmBase", "fechaCierreIngram", "fechaCierreFabricante", "compraEstimada", "probabilidad", "situacion", "clienteFinal"].forEach(
     (id) => $(id).addEventListener("input", validateAll)
   );
 
   $("btnGuardar").addEventListener("click", guardarOportunidad);
-  $("btnNotificar").addEventListener("click", notificarSeleccionados);
   $("btnRefrescarDashboard").addEventListener("click", loadDashboard);
   $("btnVerTabla").addEventListener("click", abrirModalTabla);
   $("btnCerrarModal").addEventListener("click", cerrarModalTabla);
