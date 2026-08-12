@@ -482,7 +482,7 @@ async function init() {
   });
   $("campana").addEventListener("change", validateAll);
   $("detalle").addEventListener("input", validateAll);
-  ["valorCotizado", "trmDia", "trmBase", "fechaCierreIngram", "fechaCierreFabricante", "compraEstimada", "probabilidad", "situacion", "clienteFinal"].forEach(
+  ["valorCotizado", "trmDia", "fechaCierreIngram", "fechaCierreFabricante", "compraEstimada", "probabilidad", "situacion", "clienteFinal"].forEach(
     (id) => $(id).addEventListener("input", validateAll)
   );
 
@@ -497,9 +497,4 @@ async function init() {
 
   $("trmDia").value = "";
   $("trmBase").value = "3708";
-  $("fechaCierreIngram").value = todayISO();
-
-  validateAll();
-}
-
-document.addEventListener("DOMContentLoaded", init);
+  $("fechaCierreIngram").value =
