@@ -5,47 +5,81 @@
  * compartida del formulario, evitando que varias personas se
  * pisen los cambios como pasaba en el Excel.
  *
+ * Las primeras 36 columnas (COLUMNAS_CRM) son EXACTAMENTE las
+ * del export de X4A, en el mismo orden — son las que se ven en
+ * la ventana "Ver tabla para copiar" y se pegan tal cual en X4A.
+ *
+ * "ID Interno" es la única columna de control, solo para tener
+ * un identificador único por fila internamente; nunca aparece
+ * en la tabla que se copia hacia X4A.
+ *
  * INSTALACIÓN (ver README.md para el paso a paso completo):
  * 1. Crea una Google Sheet nueva, llámala "X4A - Oportunidades".
  * 2. Extensiones → Apps Script. Borra el contenido de Código.gs
  *    y pega este archivo completo.
- * 3. Ajusta HOJA_NOMBRE si usaste otro nombre de pestaña.
- * 4. Implementar → Nueva implementación → Tipo: Aplicación web.
+ * 3. Implementar → Nueva implementación → Tipo: Aplicación web.
  *    - Ejecutar como: Yo
  *    - Quién tiene acceso: Cualquier usuario
- * 5. Copia la URL resultante (termina en /exec) y pégala en
+ * 4. Copia la URL resultante (termina en /exec) y pégala en
  *    js/config.js como APPS_SCRIPT_URL.
+ *
+ * NOTA: si ya habías desplegado una versión anterior con otras
+ * columnas, RENOMBRA la pestaña "Oportunidades" vieja (para no
+ * perder los datos) antes de volver a probar, así se crea una
+ * pestaña nueva con el esquema correcto.
  */
 
 const HOJA_NOMBRE = "Oportunidades";
 
-const COLUMNAS = [
-  "ID",
-  "Created On",
+// Valores fijos que siempre van en el export a X4A.
+const OWNER_FIJO = "Joel Ayala";
+const CREATED_BY_FIJO = "Joel Ayala";
+const EMAIL_FIJO = "Joel.Ayala@ingrammicro.com";
+
+// Columnas EXACTAS del export del CRM X4A, en este orden.
+const COLUMNAS_CRM = [
   "Government Number",
   "Owner",
-  "Est Close Date",
+  "Est. Close Date",
   "Expiry Date",
+  "Created On",
   "Probability",
+  "Stage",
   "AccountID",
   "End User Name",
   "Subject",
   "Source Campaign",
-  "Est Revenue",
+  "Est. Revenue",
   "Budget Amount",
   "Currency",
   "Current Situation",
+  "Proposed Solution",
   "IM Calendar Month",
   "IM Calendar Quarter",
+  "IM Calendar Week",
   "IM Calendar Year",
+  "ID",
   "Created By",
-  "Primary Email (Created By)",
+  "Primary Email (Created By) (User)",
+  "Contact",
+  "Sales Stage2",
+  "Status Reason (PTS)",
+  "Status Reason",
+  "Status",
+  "Customer Need",
   "Country",
-  "Source of originating lead",
+  "BCN",
+  "Source of originating lead?",
   "Is Renewal Order",
-  "Notificado",
-  "Fecha Notificación",
+  "Identifier Type",
+  "Unique Identifier",
+  "End User MST.",
 ];
+
+// Única columna de control — SOLO uso interno, nunca se copia a X4A.
+const COLUMNAS_CONTROL = ["ID Interno"];
+
+const COLUMNAS = COLUMNAS_CRM.concat(COLUMNAS_CONTROL);
 
 function getSheet_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -63,7 +97,9 @@ function getSheet_() {
 function doGet(e) {
   const action = e.parameter.action;
   if (action === "list") {
-    return jsonOut_({ ok: true, rows: listRows_() });
+    // "columns" son solo las de X4A — así la tabla para copiar
+    // nunca incluye la columna interna de control.
+    return jsonOut_({ ok: true, columns: COLUMNAS_CRM, rows: listRows_() });
   }
   return jsonOut_({ ok: false, error: "Acción no reconocida" });
 }
@@ -79,27 +115,38 @@ function doPost(e) {
   if (body.action === "create") {
     return jsonOut_(crearFila_(body.row));
   }
-  if (body.action === "notify") {
-    return jsonOut_(notificar_(body.ids));
-  }
   return jsonOut_({ ok: false, error: "Acción no reconocida" });
 }
 
 function crearFila_(row) {
   const sheet = getSheet_();
-  const id = "OPP-" + new Date().getTime();
-  const createdOn = new Date();
+  const idInterno = "OPP-" + new Date().getTime();
+
+  const computed = {
+    Owner: OWNER_FIJO,
+    "Created By": CREATED_BY_FIJO,
+    "Primary Email (Created By) (User)": EMAIL_FIJO,
+    Currency: "US Dollar",
+    Country: "Colombia",
+    "Status Reason": "In Progress",
+    Status: "Open",
+    "ID Interno": idInterno,
+  };
+  // Nota: "ID" (columna de X4A) queda vacía a propósito — la
+  // asigna X4A al importar. "Expiry Date", "Stage", "AccountID",
+  // "Proposed Solution", "IM Calendar Month/Quarter/Week/Year",
+  // "Contact", "Sales Stage2", "Status Reason (PTS)",
+  // "Customer Need", "BCN", "Identifier Type", "Unique Identifier"
+  // y "End User MST." también quedan vacías porque nadie las
+  // envía y no están en "computed".
 
   const values = COLUMNAS.map((col) => {
-    if (col === "ID") return id;
-    if (col === "Created On") return createdOn;
-    if (col === "Notificado") return "No";
-    if (col === "Fecha Notificación") return "";
+    if (computed[col] !== undefined) return computed[col];
     return row[col] !== undefined ? row[col] : "";
   });
 
   sheet.appendRow(values);
-  return { ok: true, id: id };
+  return { ok: true, id: idInterno };
 }
 
 function listRows_() {
@@ -112,57 +159,14 @@ function listRows_() {
     const obj = {};
     headers.forEach((h, idx) => {
       let val = data[i][idx];
-      if (val instanceof Date) val = Utilities.formatDate(val, Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+      if (val instanceof Date) {
+        val = Utilities.formatDate(val, Session.getScriptTimeZone(), "dd/MM/yyyy");
+      }
       obj[h] = val;
     });
     rows.push(obj);
   }
-  // Más recientes primero
   return rows.reverse();
-}
-
-function notificar_(ids) {
-  const sheet = getSheet_();
-  const data = sheet.getDataRange().getValues();
-  const headers = data[0];
-  const idCol = headers.indexOf("ID");
-  const emailCol = headers.indexOf("Primary Email (Created By)");
-  const ownerCol = headers.indexOf("Owner");
-  const subjectCol = headers.indexOf("Subject");
-  const govCol = headers.indexOf("Government Number");
-  const notifCol = headers.indexOf("Notificado");
-  const notifFechaCol = headers.indexOf("Fecha Notificación");
-
-  let sent = 0;
-  for (let i = 1; i < data.length; i++) {
-    const rowId = data[i][idCol];
-    if (ids.indexOf(String(rowId)) === -1) continue;
-
-    const email = data[i][emailCol];
-    const owner = data[i][ownerCol];
-    const subject = data[i][subjectCol];
-    const gobierno = data[i][govCol];
-
-    if (email) {
-      MailApp.sendEmail({
-        to: email,
-        subject: "Tu oportunidad ya fue cargada en X4A",
-        body:
-          `Hola ${owner || ""},\n\n` +
-          `Confirmamos que la siguiente oportunidad ya fue cargada en el CRM X4A:\n\n` +
-          `TEMA: ${subject}\n` +
-          `Gobierno: ${gobierno}\n\n` +
-          `No es necesario volver a registrarla.\n\n` +
-          `Este es un mensaje automático del Formulario de Llaves X4A.`,
-      });
-      sent++;
-    }
-
-    sheet.getRange(i + 1, notifCol + 1).setValue("Si");
-    sheet.getRange(i + 1, notifFechaCol + 1).setValue(new Date());
-  }
-
-  return { ok: true, sent: sent };
 }
 
 function jsonOut_(obj) {
